@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common'; // почему здесь надо импортировать body? - потому что все используемые декараторы надо импортировать
+import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put } from '@nestjs/common'; // почему здесь надо импортировать body? - потому что все используемые декараторы надо импортировать
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const data = require('../../data/users.json'); // доступ к users.json
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -58,6 +58,18 @@ export class UsersController {
     user.token = token;
     this.updateArr(user, { id, name, userEmail, enabled, password, token });
     return `Успешная Авторизация. Ваш токен: ${token}`;
+  }
+
+  // находит пользователя с указанным id и передает его методу, который обновляет массив данных
+  @Put(':id')
+  async updateUser(@Param() params, @Body() createUserDto: CreateUserDto) {
+    const userId = params.id;
+    const { id, name, email, enabled, password } = createUserDto;
+    const updateElement = await data.find(item => item.id == userId);
+    if (updateElement == undefined) {
+      throw new HttpException('BAD REQUEST. Нет такого пользователя', HttpStatus.BAD_REQUEST);
+    }
+    this.updateArr(updateElement, { id, name, email, enabled, password });
   }
 
   // записывает массив данных в user.json

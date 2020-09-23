@@ -1,10 +1,9 @@
 [
   {
-    "id": 500,
-    "name": "test1000",
-    "email": "test@yan.ru",
+    "id": 1,
+    "name": "test5",
     "enabled": false,
     "password": "123",
-    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjAwNzc4MTAwLCJleHAiOjE2MDA3OTI1MDB9.CMQOKByuZBVVg5B-60ufbzMfj5HCHDGVHcZk_Pf4rbk"
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjAwODUwMjIwLCJleHAiOjE2MDA4NjQ2MjB9.9uDcGW_Ggbdh6aJ3M3qfLbxCfCpuRo6_g2nLGuSl4us"
   }
 ]

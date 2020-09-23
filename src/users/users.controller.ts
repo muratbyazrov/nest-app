@@ -1,14 +1,10 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put } from '@nestjs/common'; // почему здесь надо импортировать body? - потому что все используемые декараторы надо импортировать
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { UsersService } from './users.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const data = require('../../data/users.json'); // доступ к users.json
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const bcrypt = require('bcrypt'); //  для хеширования пароля
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs'); // модуль для работы с файлами
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const jwt = require('jsonwebtoken'); // моуль для создания токенов
 
-class CreateUserDto { // это схъема пользователя
+class CreateUserDto { // схема body при регистрации
   id: number;
   name: string;
   email: string;
@@ -16,13 +12,14 @@ class CreateUserDto { // это схъема пользователя
   password: string;
 }
 
-class LoginUserDto {
+class LoginUserDto { // схема body при авторизации
   email: string;
   password: string;
 }
 
 @Controller('users')
 export class UsersController {
+  constructor(private usersService: UsersService) {}
 
   @Get() // отдать всех пользователей
   findAllUsers() {
@@ -30,69 +27,20 @@ export class UsersController {
   }
 
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDto) { // передается сюда, но не понятно как точно работает
-    const { id, name, email, enabled, password } = createUserDto;
-    const token = '';
-    const hash = await bcrypt.hash(password, 10);
-    data.push({ id, name, email, enabled, password: hash, token });
-    await this.updateData();
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    await this.usersService.createUser(createUserDto)
     return 'Регистрация успешна';
   }
 
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto) {
-    const { email, password } = loginUserDto; // достали body запроса
-
-    const user = await this.findUser(email); //Ждем, пока ведется поиск по email
-    if (user == undefined) { // если такого email нет, сразу выкидываем ошибку
-      return Promise.reject(new Error('Неправильные почта или пароль'));
-    }
-    const { id, name, userEmail, enabled } = user;
-
-    const matched = await bcrypt.compare(password, user.password); // сравнивам хеши паролей
-    if (!matched) { // если сравнение возвращает false, кидаем ошибку
-      throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-    }
-    // если сравнение возвращает true, создаем токен и записываем его в поля пользователя
-    const token = jwt.sign({ id: user.id }, 'token-key', { expiresIn: 3600 * 4 });
-    user.token = token;
-    this.updateArr(user, { id, name, userEmail, enabled, password, token });
-    return `Успешная Авторизация. Ваш токен: ${token}`;
+    await this.usersService.login(loginUserDto)
+    return `Успешная Авторизация.`;
   }
 
-  // находит пользователя с указанным id и передает его методу, который обновляет массив данных
   @Put(':id')
   async updateUser(@Param() params, @Body() createUserDto: CreateUserDto) {
-    const userId = params.id;
-    const { id, name, email, enabled, password } = createUserDto;
-    const updateElement = await data.find(item => item.id == userId);
-    if (updateElement == undefined) {
-      throw new HttpException('BAD REQUEST. Нет такого пользователя', HttpStatus.BAD_REQUEST);
-    }
-    this.updateArr(updateElement, { id, name, email, enabled, password });
+    await this.usersService.updateUser(createUserDto, params)
+    return 'Данные обновлены'
   }
-
-  // записывает массив данных в user.json
-  private async updateData() {
-    const newArray = JSON.stringify(data);
-    fs.writeFile('./data/users.json', newArray, (err) => {
-      if (err) {
-        return Promise.reject(new Error(err));
-      }
-    });
-  }
-
-  private updateArr(element, obj) {
-    const token = element.token; // токен оставляем как был
-    const { id, name, email, enabled, password } = obj;
-    const elementIndex = data.indexOf(element);
-    const updateElement = { id, name, email, enabled, password, token };
-    data.splice(elementIndex, 1, updateElement);
-    this.updateData();
-  }
-
-  private async findUser(email) {
-    return Promise.resolve(data.find(item => item.email == email));
-  }
-
 }

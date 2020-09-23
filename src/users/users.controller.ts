@@ -3,19 +3,8 @@ import { UsersService } from './users.service';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const data = require('../../data/users.json'); // доступ к users.json
 // eslint-disable-next-line @typescript-eslint/no-var-requires
+import { CreateUserDto, LoginUserDto } from './dto/create-user.dto';
 
-class CreateUserDto { // схема body при регистрации
-  id: number;
-  name: string;
-  email: string;
-  enabled: boolean;
-  password: string;
-}
-
-class LoginUserDto { // схема body при авторизации
-  email: string;
-  password: string;
-}
 
 @Controller('users')
 export class UsersController {

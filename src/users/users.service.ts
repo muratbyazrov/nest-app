@@ -13,7 +13,8 @@ export class UsersService {
 
   // регистрация
   async createUser(createUserDto): Promise<void> {
-    const { id, name, email, enabled, password } = createUserDto;
+    const { name, email, enabled, password } = createUserDto;
+    const id = data.length+1; // задаем последовательный уникальный id
     const token = '';
     const hash = await bcrypt.hash(password, 10);
     data.push({ id, name, email, enabled, password: hash, token });
@@ -40,13 +41,14 @@ export class UsersService {
   }
 
   async updateUser(createUserDto, params) {
-    const userId = params.id;
-    const { id, name, email, enabled, password } = createUserDto;
-    const updateElement = await data.find(item => item.id == userId);
+    const id = params.id;
+    const { name, email, enabled, password } = createUserDto;
+    const updateElement = await data.find(item => item.id == id);
     if (updateElement == undefined) {
       throw new HttpException('BAD REQUEST. Нет такого пользователя', HttpStatus.BAD_REQUEST);
     }
-    this.updateArr(updateElement, { id, name, email, enabled, password });
+    const hash = await bcrypt.hash(password, 10); // хешируем измененый пароль
+    this.updateArr(updateElement, { id, name, email, enabled, password:hash }); // id не будем менять
   }
 
   // обновить файл с данными

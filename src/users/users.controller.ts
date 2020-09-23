@@ -6,6 +6,14 @@ const data = require('../../data/users.json'); // доступ к users.json
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto'
 
+interface IUser {
+  id: number;
+  name: string;
+  email: string;
+  enabled: boolean;
+  password: string;
+}
+
 
 @Controller('users')
 export class UsersController {

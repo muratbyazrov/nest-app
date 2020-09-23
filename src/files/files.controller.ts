@@ -10,6 +10,7 @@ export class FilesController {
   @Get(':id')
   async download(@Param() params,  @Res() res) {
     const fileName = params.id;
+    console.timeEnd('Watcher');
     return res.sendFile(fileName, { root: path.join(__dirname, `../../uploads`) });
   }
 
@@ -24,6 +25,7 @@ export class FilesController {
     }),
   }))
   async ( @UploadedFile() file) {
+    console.timeEnd('Watcher');
     return 'Файл загружен';
   }
 }

@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
 import { AuthMiddleware } from './middlewares/middlewares';
+import { TimerMiddleware } from './middlewares/timerMiddleware';
 
 @Module({
   imports: [FilesModule, UsersModule],
@@ -13,7 +14,7 @@ import { AuthMiddleware } from './middlewares/middlewares';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
-      .apply(AuthMiddleware)
+      .apply(AuthMiddleware, TimerMiddleware)
       .exclude({path: 'users/login', method: RequestMethod.POST}) // кроме запроса на авторизацию
       .forRoutes({path: '', method: RequestMethod.ALL}) // проверка авторизации всех запросов
   }

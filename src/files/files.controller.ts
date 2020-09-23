@@ -1,32 +1,29 @@
-import { Controller, Get, NestMiddleware, Injectable, Post } from '@nestjs/common';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const multer = require('multer'); // подключили модуль для работы с загрузкой-выгрузкой фалов
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { base64encode, base64decode } = require('nodejs-base64'); // для сохранения файлов в формате base64
-
-const storageConfig = multer.diskStorage({ // конфигурация загружаемого файла
-  destination: (req, file, cb) => {
-    cb(null, 'uploads');
-  },
-  filename: (req, file, cb) => {
-    cb(null, base64encode(file.originalname));
-  },
-});
+import { Controller, Get, Post, UseInterceptors, UploadedFile, Param, Res } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
+import { diskStorage } from 'multer';
+import { v4 as uuid } from 'uuid';
+import * as path from 'path';
 
 @Controller('files')
 export class FilesController {
-  @Get()
-  async upload() {
-    console.log('скачать из сервера')
+  @Get(':id')
+  async download(@Param() params,  @Res() res) {
+    const fileName = params.id;
+    return res.sendFile(fileName, { root: path.join(__dirname, `../../uploads`) });
   }
 
   @Post()
-  async download() {
-    console.log('загрузить на сервер')
-    // multer({storage: storageConfig}).single("")
-   
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req: any, file: any, cb: any) => {
+        // генериться имя файла
+        cb(null, `${uuid()}${extname(file.originalname)}`);
+      },
+    }),
+  }))
+  async ( @UploadedFile() file) {
+    return 'Файл загружен';
   }
 }

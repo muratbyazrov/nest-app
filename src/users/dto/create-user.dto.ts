@@ -5,8 +5,3 @@ export class CreateUserDto { // схема body при регистрации
   enabled: boolean;
   password: string;
 }
-
-export class LoginUserDto { // схема body при авторизации
-  email: string;
-  password: string;
-}

@@ -1,9 +1,9 @@
-import { Injectable, MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { FilesModule } from './files/files.module';
 import { UsersModule } from './users/users.module';
-import { DownloadMiddleware } from './middlewares/middlewares';
+import { AuthMiddleware } from './middlewares/middlewares';
 
 @Module({
   imports: [FilesModule, UsersModule],
@@ -13,7 +13,8 @@ import { DownloadMiddleware } from './middlewares/middlewares';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {
     consumer
-      .apply(DownloadMiddleware)
-      .forRoutes({path: 'files', method: RequestMethod.GET})
+      .apply(AuthMiddleware)
+      .exclude({path: 'users/login', method: RequestMethod.POST}) // кроме запроса на авторизацию
+      .forRoutes({path: '', method: RequestMethod.ALL}) // проверка авторизации всех запросов
   }
 }
